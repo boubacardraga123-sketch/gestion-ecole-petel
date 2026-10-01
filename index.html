@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B2A4A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Registre École">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Registre de l'École — Gestion scolaire (hors ligne)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B2A4A;
+  --ink-light:#2E3F63;
+  --paper:#F6F1E4;
+  --paper-line:#D8D0B8;
+  --gold:#B8862E;
+  --gold-dark:#93691E;
+  --green:#2F6B4F;
+  --red:#8B3A3A;
+  --text:#26241C;
+  --muted:#726F5F;
+  --white:#FFFDF8;
+  --shadow: 0 1px 0 rgba(27,42,74,0.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--text);min-height:100vh;}
+::selection{background:var(--gold);color:var(--white);}
+
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:280px;flex:none;background:var(--ink);color:#E7E9F2;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-head{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.12);}
+.sidebar-head .stamp{font-family:'Roboto Slab',serif;font-weight:700;font-size:15px;letter-spacing:0.02em;color:var(--gold);}
+.sidebar-head .sub{font-size:11.5px;color:#B9C0D8;margin-top:4px;line-height:1.4;}
+.offline-pill{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(47,107,79,0.25);color:#BFE7CF;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;}
+.offline-pill .dot{width:6px;height:6px;border-radius:50%;background:#4FD888;}
+.nav-group{padding:10px 10px 4px;}
+.nav-group-title{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8894B8;padding:10px 10px 4px;font-weight:600;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 2px;border-radius:6px;font-size:13.5px;color:#D7DBEA;cursor:pointer;border-left:3px solid transparent;transition:background .12s ease;}
+.nav-item:hover{background:rgba(255,255,255,0.06);}
+.nav-item.active{background:rgba(184,134,46,0.18);color:#FFF3DC;border-left-color:var(--gold);font-weight:600;}
+.nav-item .n{font-family:'Roboto Slab',serif;font-size:11px;color:#8894B8;min-width:18px;}
+.nav-item.active .n{color:var(--gold);}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{background:var(--white);border-bottom:1px solid var(--paper-line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:5;}
+.topbar h1{font-family:'Roboto Slab',serif;font-size:19px;margin:0;color:var(--ink);}
+.topbar .desc{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.year-box{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--paper-line);padding:6px 10px;border-radius:8px;}
+.year-box select{border:none;background:transparent;font-family:'Inter';font-weight:600;color:var(--ink);font-size:13.5px;padding:2px 4px;cursor:pointer;}
+.year-box label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.btn-mini{border:1px solid var(--gold);color:var(--gold-dark);background:transparent;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;font-weight:600;}
+.btn-mini:hover{background:var(--gold);color:#fff;}
+
+.content{padding:24px 28px 60px;flex:1;}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:18px;}
+.stat-card{background:var(--white);border:1px solid var(--paper-line);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);}
+.stat-card .num{font-family:'Roboto Slab',serif;font-size:28px;color:var(--ink);}
+.stat-card .lbl{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+.panel{background:var(--white);border:1px solid var(--paper-line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--paper-line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.panel-head h2{font-family:'Roboto Slab',serif;font-size:16.5px;margin:0;color:var(--ink);}
+.panel-head p{font-size:12.5px;color:var(--muted);margin:3px 0 0;max-width:640px;}
+.btn{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn:hover{background:var(--ink-light);}
+.btn.gold{background:var(--gold);}
+.btn.gold:hover{background:var(--gold-dark);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:#F1ECDD;color:var(--ink);text-align:left;padding:9px 12px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--paper-line);position:sticky;top:0;}
+tbody td{padding:9px 12px;border-bottom:1px solid #EFEAD9;white-space:nowrap;color:var(--text);}
+tbody tr:hover{background:#FBF8EF;}
+.empty-row td{color:var(--muted);font-style:italic;text-align:center;padding:26px;}
+.row-actions{display:flex;gap:6px;}
+.icon-btn{border:1px solid var(--paper-line);background:#fff;border-radius:6px;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--ink);}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold-dark);}
+.icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+
+.overlay{position:fixed;inset:0;background:rgba(27,20,10,0.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50;}
+.overlay.show{display:flex;}
+.modal{background:#fff;border-radius:12px;max-width:640px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,0.25);}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--paper-line);display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{margin:0;font-family:'Roboto Slab',serif;font-size:16px;color:var(--ink);}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);}
+.modal-body{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field.full{grid-column:1/-1;}
+.field label{font-size:12px;color:var(--muted);font-weight:600;}
+.field input,.field select,.field textarea{border:1px solid var(--paper-line);border-radius:7px;padding:8px 10px;font-family:'Inter';font-size:13.5px;background:#FCFAF3;color:var(--text);}
+.field textarea{min-height:64px;resize:vertical;}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--paper-line);display:flex;justify-content:flex-end;gap:10px;}
+.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--paper-line);}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:100;opacity:0;transform:translateY(8px);transition:all .2s ease;}
+.toast.show{opacity:1;transform:translateY(0);}
+.hidden{display:none !important;}
+.print-header{display:none;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#c9c2ac;border-radius:8px;}
+#fileImport, #logoImport{display:none;}
+
+#authGate{display:flex;position:fixed;inset:0;z-index:999;background:var(--ink);align-items:center;justify-content:center;padding:20px;}
+#authGate .box{background:var(--white);border-radius:12px;padding:26px 24px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;}
+#authGate h2{font-family:'Roboto Slab',serif;margin:0;color:var(--ink);font-size:20px;}
+#authGate p{margin:0;font-size:12.5px;color:var(--muted);}
+#authGate input{padding:11px 12px;border:1px solid var(--paper-line);border-radius:8px;font-size:15px;font-family:inherit;}
+#authGate button{padding:11px;border-radius:8px;border:0;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;}
+#authGate .b1{background:var(--ink);color:#fff;}
+#authGate .b2{background:transparent;color:var(--ink);border:1px solid var(--paper-line);}
+#authGate .err{color:var(--red);font-size:12.5px;min-height:16px;}
+@media print{ #authGate{display:none !important;} }
+
+/* ---------- Impression au format A4 ---------- */
+@media print{
+  @page{ size: A4 portrait; margin: 14mm 12mm; }
+  body{ background:#fff; }
+  .no-print{ display:none !important; }
+  .print-header{ display:block !important; position:relative; min-height:125px; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid #1B2A4A; }
+  .print-header .ph-left{ position:absolute; top:0; left:0; font-size:9.5px; line-height:1.5; color:#333; text-align:left; }
+  .print-header .ph-etab{ font-weight:700; margin-top:2px; max-width:200px; }
+  .print-header .ph-right{ position:absolute; top:0; right:0; }
+  .print-header .ph-logo{ max-height:52px; max-width:80px; object-fit:contain; }
+  .print-header .ph-official{ text-align:center; margin-bottom:8px; }
+  .print-header .ph-country{ font-family:'Roboto Slab',serif; font-weight:700; font-size:14px; letter-spacing:0.03em; color:#111; }
+  .print-header .ph-motto{ font-size:11.5px; color:#333; margin-top:2px; }
+  .print-header .ph-school{ font-family:'Roboto Slab',serif; font-weight:700; font-size:15px; color:#1B2A4A; }
+  .print-header .ph-meta{ position:absolute; left:0; right:0; bottom:10px; display:flex; justify-content:space-between; font-size:11.5px; color:#444; margin-top:4px; }
+  .sidebar{ display:none !important; }
+  .main{ width:100%; }
+  .content{ padding:0; }
+  .topbar{ position:static; border:none; padding:0 0 10px; }
+  .panel{ border:none; box-shadow:none; border-radius:0; }
+  .panel-head{ border:none; padding:0 0 8px; }
+  .panel-head p{ max-width:none; }
+  table{ font-size:11px; }
+  thead th{ background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; position:static; }
+  tbody tr{ break-inside:avoid; }
+  table, tr, td, th{ page-break-inside:avoid; }
+}
+
+#sbBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:39;}
+.menu-btn{display:none;}
+@media(max-width:820px){
+  .menu-btn{display:inline-flex;font-weight:700;}
+  .sidebar{position:fixed;left:-280px;transition:left .18s ease;z-index:40;}
+  .sidebar.open{left:0;}
+  .content{padding:18px;}
+  .modal-body{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="authGate">
+  <div class="box">
+    <h2>Registre de l'École</h2>
+    <p>Connectez-vous pour retrouver vos données sur tous vos appareils.</p>
+    <input type="email" id="authEmail" placeholder="Adresse e-mail" autocomplete="username">
+    <input type="password" id="authPass" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
+    <div class="err" id="authErr"></div>
+    <button class="b1" onclick="authSubmit('login')">Se connecter</button>
+    <button class="b2" onclick="authSubmit('signup')">Créer un compte</button>
+    <button class="b2" onclick="authReset()">Mot de passe oublié ?</button>
+    <button class="b2 installBtn" style="display:none" onclick="installApp()">📲 Installer l'application</button>
+    <p class="iosHint" style="display:none">Sur iPhone : touchez Partager puis « Sur l'écran d'accueil ».</p>
+    <button class="b2" id="authSkip" style="display:none" onclick="appStartLocal()">Continuer sans connexion</button>
+  </div>
+</div>
+
+<div id="app" class="shell" style="display:none">
+  <aside class="sidebar no-print" id="sidebar">
+    <div class="sidebar-head">
+      <div class="stamp" id="schoolNameLabel">ÉTABLISSEMENT</div>
+      <div class="sub">Registre numérique du directeur — 28 rubriques du cahier de charges</div>
+      <div class="offline-pill"><span class="dot"></span> Fonctionne 100% hors connexion</div>
+    </div>
+    <nav id="navContainer"></nav>
+    <div style="padding:14px 16px 22px;display:flex;flex-direction:column;gap:8px;">
+      <button class="btn-mini" style="color:#D7DBEA;border-color:#5a6488;width:100%;" onclick="exportBackup()">⬇ Exporter une sauvegarde</button>
+      <button class="btn-mini" style="color:#D7DBEA;border-color:#5a6488;width:100%;" onclick="document.getElementById('fileImport').click()">⬆ Importer une sauvegarde</button>
+      <input type="file" id="fileImport" accept="application/json">
+      <button class="btn-mini" style="color:#D7DBEA;border-color:#5a6488;width:100%;" onclick="editEstablishmentInfo()">🏫 Infos établissement (en-tête)</button>
+      <button class="btn-mini" style="color:#D7DBEA;border-color:#5a6488;width:100%;" onclick="document.getElementById('logoImport').click()">🖼 Logo de l'école</button>
+      <input type="file" id="logoImport" accept="image/*">
+      <div id="userBox" style="display:none;font-size:11.5px;color:#B9C0D8;text-align:center;word-break:break-all;"></div>
+      <button class="btn-mini installBtn" style="display:none;color:#FFF3DC;border-color:var(--gold);width:100%;" onclick="installApp()">📲 Installer l'application</button>
+      <button id="logoutBtn" class="btn-mini" style="display:none;color:#D7DBEA;border-color:#5a6488;width:100%;" onclick="authLogout()">⎋ Se déconnecter</button>
+      <button class="btn-mini" style="color:#E7A9A9;border-color:#7a4646;width:100%;" onclick="wipeAll()">🗑 Tout effacer</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="btn-mini menu-btn no-print" onclick="toggleSidebar()">☰ Menu</button>
+      <div>
+        <h1 id="pageTitle">Tableau de bord</h1>
+        <div class="desc" id="pageDesc">Vue d'ensemble de l'établissement</div>
+      </div>
+      <div class="year-box no-print">
+        <label>Année scolaire</label>
+        <select id="yearSelect"></select>
+        <button class="btn-mini" onclick="promptNewYear()">+ Nouvelle</button>
+      </div>
+      <button class="btn-mini no-print" onclick="window.print()">🖶 Imprimer (A4)</button>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div id="sbBackdrop" class="no-print" onclick="closeSidebar()"></div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Ajouter</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="modalForm">
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot">
+        <button type="button" class="btn secondary" onclick="closeModal()">Annuler</button>
+        <button type="submit" class="btn gold">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   STOCKAGE LOCAL — aucune connexion internet requise.
+   Tout est gardé dans le navigateur (localStorage) sur cet appareil.
+   Utilisez "Exporter une sauvegarde" régulièrement pour ne rien perdre
+   (changement de navigateur, réinstallation, autre ordinateur...).
+========================================================================= */
+let LS_KEY = 'ecole_offline_db_v1';
+
+function emptyDB(){
+  return {
+    schoolName: 'ÉTABLISSEMENT',
+    region: '',
+    ire: 'Mamou',
+    dceOuDpe: 'Mamou',
+    dsee: 'Mamou',
+    logo: '',
+    annees: [],          // {id, libelle}
+    eleves: [],          // {id, ...champs}
+    personnel: [],        // {id, ...champs}
+    data: {}             // { [anneeId]: { [moduleKey]: [ {id, ...champs} ] } }
+  };
+}
+
+let DB = null;
+function loadDB(){
+  const raw = localStorage.getItem(LS_KEY);
+  DB = raw ? JSON.parse(raw) : emptyDB();
+  if(!DB.data) DB.data = {};
+}
+function saveDB(){
+  localStorage.setItem(LS_KEY, JSON.stringify(DB));
+  if(CLOUD.uid && CLOUD.ready) cloudSchedule();
+}
+
+/* =========================================================================
+   FIREBASE — connexion + synchronisation (le localStorage reste le cache hors ligne)
+========================================================================= */
+const CLOUD = {uid:null, ready:false, last:{}, timer:null};
+
+function cloudParts(){
+  const parts = {
+    meta: JSON.stringify({schoolName:DB.schoolName, region:DB.region, ire:DB.ire, dceOuDpe:DB.dceOuDpe, dsee:DB.dsee, logo:DB.logo, annees:DB.annees}),
+    eleves: JSON.stringify(DB.eleves||[]),
+    personnel: JSON.stringify(DB.personnel||[])
+  };
+  for(const aid in (DB.data||{})) for(const k in DB.data[aid]) parts['d_'+aid+'__'+k] = JSON.stringify(DB.data[aid][k]);
+  return parts;
+}
+function dbFromParts(parts){
+  const d = Object.assign(emptyDB(), JSON.parse(parts.meta||'{}'));
+  d.eleves = JSON.parse(parts.eleves||'[]');
+  d.personnel = JSON.parse(parts.personnel||'[]');
+  d.data = {};
+  for(const id in parts){
+    if(id.indexOf('d_')!==0) continue;
+    const r = id.slice(2), i = r.indexOf('__');
+    const aid = r.slice(0,i), k = r.slice(i+2);
+    (d.data[aid] = d.data[aid]||{})[k] = JSON.parse(parts[id]);
+  }
+  return d;
+}
+function cloudSchedule(now){
+  clearTimeout(CLOUD.timer);
+  CLOUD.timer = setTimeout(cloudPush, now?0:1500);
+}
+async function cloudPush(){
+  if(!CLOUD.uid || !CLOUD.ready || !window.fbPush) return;
+  const parts = cloudParts(), before = CLOUD.last;
+  CLOUD.last = parts;
+  try{ await window.fbPush(CLOUD.uid, parts, before); }
+  catch(e){ CLOUD.last = {}; console.error(e); toast('Synchronisation impossible pour le moment'); }
+}
+async function cloudSync(){
+  try{
+    const r = await window.fbPull(CLOUD.uid);
+    if(r.parts.meta){
+      if(!r.fromCache){
+        DB = dbFromParts(r.parts);
+        localStorage.setItem(LS_KEY, JSON.stringify(DB));
+        boot();
+      }
+      CLOUD.last = r.parts; CLOUD.ready = true;
+    }else if(!r.fromCache){
+      CLOUD.last = {}; CLOUD.ready = true; cloudSchedule(true);   // première synchro : on envoie les données locales
+    }
+  }catch(e){ console.error(e); }
+  if(!CLOUD.ready) toast('Hors connexion — synchronisation à la reconnexion');
+}
+window.addEventListener('online', ()=>{ if(CLOUD.uid && !CLOUD.ready) cloudSync(); });
+
+/* ---- Connexion ---- */
+function authMsg(m){ document.getElementById('authErr').textContent = m||''; }
+function authFriendly(e){
+  const c = (e && e.code) || '';
+  if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')) return 'E-mail ou mot de passe incorrect.';
+  if(c.includes('email-already-in-use')) return 'Ce compte existe déjà : utilisez « Se connecter ».';
+  if(c.includes('weak-password')) return 'Mot de passe trop court (6 caractères minimum).';
+  if(c.includes('invalid-email')) return 'Adresse e-mail invalide.';
+  if(c==='not-configured') return 'Firebase n\'est pas encore configuré (collez votre firebaseConfig dans le fichier).';
+  if(c.includes('network')) return 'Pas de connexion internet.';
+  return 'Erreur : '+(c||e.message);
+}
+async function authSubmit(mode){
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  if(!email || !pass){ authMsg('Saisissez l\'e-mail et le mot de passe.'); return; }
+  authMsg('Veuillez patienter…');
+  try{ await window.fbAuthAction(mode, email, pass); authMsg(''); }
+  catch(e){ authMsg(authFriendly(e)); }
+}
+async function authReset(){
+  const email = document.getElementById('authEmail').value.trim();
+  if(!email){ authMsg('Saisissez d\'abord votre e-mail.'); return; }
+  try{ await window.fbAuthAction('reset', email); authMsg('E-mail de réinitialisation envoyé.'); }
+  catch(e){ authMsg(authFriendly(e)); }
+}
+async function authLogout(){
+  if(!confirm('Se déconnecter ?')) return;
+  if(CLOUD.ready) await cloudPush();
+  await window.fbAuthAction('logout');
+}
+/* ---- Installation (PWA) ---- */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredInstall = e;
+  document.querySelectorAll('.installBtn').forEach(b=>b.style.display='block');
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredInstall = null;
+  document.querySelectorAll('.installBtn').forEach(b=>b.style.display='none');
+  toast('Application installée');
+});
+async function installApp(){
+  if(!deferredInstall) return;
+  deferredInstall.prompt();
+  await deferredInstall.userChoice;
+  deferredInstall = null;
+  document.querySelectorAll('.installBtn').forEach(b=>b.style.display='none');
+}
+(function(){
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if(ios && !standalone) document.querySelectorAll('.iosHint').forEach(p=>p.style.display='block');
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+    window.addEventListener('load', ()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  }
+})();
+
+window.fbAuthAction = async function(){ throw {code:'not-configured'}; };   // remplacé par le module quand Firebase est configuré
+function appFirebaseFailed(msg){   // Firebase injoignable : on montre la fenêtre + accès hors connexion
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('authSkip').style.display = 'block';
+  authMsg(msg);
+}
+function appNeedConfig(){          // Firebase pas encore configuré : on montre la fenêtre, avec accès hors ligne
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authGate').style.display = 'flex';
+  document.getElementById('authSkip').style.display = 'block';
+  authMsg('Firebase n\'est pas encore configuré : la connexion est inactive.');
+}
+function appStartLocal(){          // accès sans connexion (comme avant, hors ligne)
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  boot();
+}
+async function appOnAuth(user){
+  const gate = document.getElementById('authGate'), app = document.getElementById('app');
+  if(!user){
+    authMsg('');
+    CLOUD.uid = null; CLOUD.ready = false; CLOUD.last = {};
+    app.style.display = 'none'; gate.style.display = 'flex';
+    document.getElementById('authPass').value = '';
+    return;
+  }
+  CLOUD.uid = user.uid; CLOUD.ready = false;
+  const legacy = 'ecole_offline_db_v1';
+  LS_KEY = legacy + '_' + user.uid;
+  if(!localStorage.getItem(LS_KEY) && localStorage.getItem(legacy)) localStorage.setItem(LS_KEY, localStorage.getItem(legacy));
+  gate.style.display = 'none'; app.style.display = '';
+  document.getElementById('userBox').style.display = 'block';
+  document.getElementById('userBox').textContent = user.email || '';
+  document.getElementById('logoutBtn').style.display = 'block';
+  boot();
+  await cloudSync();
+}
+function uid(){
+  return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9);
+}
+
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `sauvegarde-ecole-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Sauvegarde téléchargée');
+}
+document.getElementById('fileImport').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!imported.eleves || !imported.personnel){ throw new Error('Fichier invalide'); }
+      if(!confirm("Importer cette sauvegarde va REMPLACER toutes les données actuelles. Continuer ?")) return;
+      DB = imported;
+      if(!DB.data) DB.data = {};
+      saveDB();
+      boot();
+      toast('Sauvegarde importée avec succès');
+    }catch(err){
+      alert("Impossible de lire ce fichier : "+err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+document.getElementById('logoImport').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    DB.logo = reader.result;
+    saveDB();
+    renderCurrentModule();
+    toast('Logo mis à jour');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+function editEstablishmentInfo(){
+  const schoolName = prompt("Nom de l'établissement :", DB.schoolName||'');
+  if(schoolName===null) return;
+  const ire = prompt("IRE :", DB.ire||'Mamou');
+  if(ire===null) return;
+  const dpe = prompt("DPE :", DB.dceOuDpe||'Mamou');
+  if(dpe===null) return;
+  const dse = prompt("DSE :", DB.dsee||'Mamou');
+  if(dse===null) return;
+  DB.schoolName = schoolName;
+  DB.ire = ire;
+  DB.dceOuDpe = dpe;
+  DB.dsee = dse;
+  saveDB();
+  document.getElementById('schoolNameLabel').textContent = (DB.schoolName||'ÉTABLISSEMENT').toUpperCase();
+  renderCurrentModule();
+  toast('Informations mises à jour');
+}
+
+function wipeAll(){
+  if(confirm("Effacer TOUTES les données de cet appareil (élèves, personnel, années, tous les registres) ? Cette action est irréversible. Pensez à exporter une sauvegarde avant.")){
+    DB = emptyDB();
+    saveDB();
+    boot();
+    toast('Toutes les données ont été effacées');
+  }
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* =========================================================================
+   ANNÉES SCOLAIRES
+========================================================================= */
+let currentYearId = null;
+
+function renderYearSelect(){
+  const sel = document.getElementById('yearSelect');
+  const prev = currentYearId;
+  if(DB.annees.length===0){
+    sel.innerHTML = `<option value="">Aucune — créez une année</option>`;
+    currentYearId = null;
+  } else {
+    sel.innerHTML = DB.annees.map(a=>`<option value="${a.id}">${a.libelle}</option>`).join('');
+    if(prev && DB.annees.some(a=>a.id===prev)){
+      currentYearId = prev;
+    } else {
+      currentYearId = DB.annees[DB.annees.length-1].id;
+    }
+    sel.value = currentYearId;
+  }
+}
+document.getElementById('yearSelect').addEventListener('change', (e)=>{
+  currentYearId = e.target.value;
+  renderCurrentModule();
+});
+function promptNewYear(){
+  const libelle = prompt("Libellé de la nouvelle année scolaire (ex : 2026-2027) :");
+  if(!libelle) return;
+  const id = uid();
+  DB.annees.push({id, libelle});
+  DB.data[id] = {};
+  saveDB();
+  renderYearSelect();
+  currentYearId = id;
+  document.getElementById('yearSelect').value = id;
+  renderCurrentModule();
+  toast('Année scolaire ajoutée : '+libelle);
+}
+
+/* =========================================================================
+   HELPERS ÉLÈVES / PERSONNEL (source de vérité pour toute l'app)
+========================================================================= */
+function eleveName(id){
+  const e = DB.eleves.find(x=>x.id===id);
+  return e ? `${e.prenom||''} ${e.nom||''}`.trim() + (e.matricule? ` (${e.matricule})`:'') : '—';
+}
+function personnelName(id){
+  const p = DB.personnel.find(x=>x.id===id);
+  return p ? `${p.prenom||''} ${p.nom||''}`.trim() : '—';
+}
+
+/* =========================================================================
+   MODULE DEFINITIONS (28 rubriques)
+   type: text | textarea | date | number | eleve | personnel | select
+========================================================================= */
+const MODULES = [
+  {key:'eleves', native:true, group:"Registres d'identification", label:'Registre matricule des élèves',
+   desc:"Premier document qui marque la vie de l'élève dans l'école. Le nom saisi ici se synchronise automatiquement dans tous les autres registres.",
+   scope:'global',
+   fields:[
+     {key:'matricule', label:'N° Matricule', type:'text', required:true},
+     {key:'prenom', label:'Prénom', type:'text', required:true},
+     {key:'nom', label:'Nom', type:'text', required:true},
+     {key:'dateNaissance', label:'Date de naissance', type:'date'},
+     {key:'lieuNaissance', label:'Lieu de naissance', type:'text'},
+     {key:'pere', label:'Père (filiation)', type:'text'},
+     {key:'mere', label:'Mère (filiation)', type:'text'},
+     {key:'domicile', label:'Domicile', type:'text'},
+     {key:'classeActuelle', label:'Classe actuelle', type:'text'},
+     {key:'dateEntree', label:"Date d'entrée", type:'date'},
+     {key:'dateSortie', label:'Date de sortie définitive', type:'date'},
+     {key:'contact', label:'Contact', type:'text'},
+   ]},
+  {key:'personnel', native:true, group:"Registres d'identification", label:'Registre des enseignants (personnel)',
+   desc:"Registre des enseignants et du personnel. Utilisé dans les tableaux synoptiques, présences, encadrement, etc.",
+   scope:'global',
+   fields:[
+     {key:'matricule', label:'N° Matricule', type:'text'},
+     {key:'prenom', label:'Prénom', type:'text', required:true},
+     {key:'nom', label:'Nom', type:'text', required:true},
+     {key:'dateLieuNaissance', label:'Date et lieu de naissance', type:'text'},
+     {key:'corps', label:'Corps', type:'text'},
+     {key:'fonction', label:'Fonction', type:'text'},
+     {key:'dateNomination', label:'Date de nomination dans le poste', type:'date'},
+     {key:'classeTenue', label:'Classe tenue', type:'text'},
+     {key:'domicile', label:'Domicile', type:'text'},
+     {key:'dateEntree', label:"Date d'entrée à l'école", type:'date'},
+     {key:'dateSortie', label:'Date de sortie', type:'date'},
+     {key:'posteOccupe', label:'Poste occupé', type:'text'},
+     {key:'dateCessation', label:'Date de cessation de fonction', type:'date'},
+   ]},
+
+  {key:'courrierArrivee', group:'Courrier & correspondance', label:"Courrier à l'arrivée",
+   desc:"Enregistre chaque année les correspondances reçues.",
+   fields:[
+     {key:'dateArrivee', label:"Date d'arrivée", type:'date'},
+     {key:'numCorrespondance', label:'N° de la correspondance', type:'text'},
+     {key:'expediteur', label:'Expéditeur', type:'text'},
+     {key:'objectif', label:'Objectif', type:'text'},
+     {key:'observation', label:'Observation', type:'textarea'},
+   ]},
+  {key:'courrierDepart', group:'Courrier & correspondance', label:'Courrier au départ',
+   desc:"Enregistre toutes les correspondances administratives partant de l'école.",
+   fields:[
+     {key:'dateDepart', label:'Date de départ', type:'date'},
+     {key:'destination', label:'Destination', type:'text'},
+     {key:'objectif', label:'Objectif', type:'text'},
+     {key:'observation', label:'Observation', type:'textarea'},
+   ]},
+  {key:'cahierTransmission', group:'Courrier & correspondance', label:'Cahier de transmission',
+   desc:"Indique que la correspondance émise est parvenue à destination (1er janvier au 31 décembre).",
+   fields:[
+     {key:'dateDepart', label:"Date de départ", type:'date'},
+     {key:'destinataire', label:'Nom et adresse du destinataire', type:'text'},
+     {key:'objectif', label:'Objectif', type:'text'},
+     {key:'nombrePiece', label:'Nombre de pièces', type:'number'},
+     {key:'emargement', label:'Émargement', type:'text'},
+   ]},
+  {key:'notesService', group:'Courrier & correspondance', label:'Cahier de note de service / circulaire',
+   desc:"Informe l'enseignant ou le collectif des enseignants autour d'un sujet donné.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'natureEcole', label:"Nature de l'école", type:'text'},
+     {key:'publicCible', label:'Public cible', type:'text'},
+     {key:'objet', label:'Objet de la correspondance', type:'textarea'},
+     {key:'emargement', label:'Émargement', type:'text'},
+   ]},
+  {key:'livreOr', group:'Courrier & correspondance', label:"Livre d'or",
+   desc:"Marque les grands événements et le passage des personnalités à l'école.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'evenement', label:'Événement / occasion', type:'text'},
+     {key:'personnalite', label:'Personnalité', type:'text'},
+     {key:'impressions', label:'Impressions consignées', type:'textarea'},
+   ]},
+  {key:'transfertArrivee', group:'Courrier & correspondance', label:'Registre de transfert — arrivée',
+   desc:"Informations des nouveaux élèves venant d'autres établissements.",
+   fields:[
+     {key:'numInscription', label:"N° d'inscription", type:'text'},
+     {key:'dateArrivee', label:"Date d'arrivée", type:'date'},
+     {key:'eleveId', label:'Élève', type:'eleve'},
+     {key:'ecoleOrigine', label:"École d'origine", type:'text'},
+     {key:'dernierCoursSuivi', label:'Dernier cours suivi', type:'text'},
+     {key:'moyenneAnnuelle', label:'Moyenne annuelle', type:'number'},
+     {key:'coursASuivre', label:'Cours à suivre', type:'text'},
+   ]},
+  {key:'transfertDepart', group:'Courrier & correspondance', label:'Registre de transfert — départ',
+   desc:"Informations des élèves sortant de l'établissement.",
+   fields:[
+     {key:'dateDepart', label:'Date de départ', type:'date'},
+     {key:'eleveId', label:'Élève', type:'eleve'},
+     {key:'ecoleAccueil', label:"École sollicitée / d'accueil", type:'text'},
+     {key:'moyenneAnnuelle', label:'Moyenne annuelle', type:'number'},
+     {key:'coursASuivre', label:'Cours à suivre', type:'text'},
+     {key:'emarg', label:'EMARG', type:'text'},
+   ]},
+  {key:'procesVerbal', group:'Courrier & correspondance', label:'Procès-verbal de réunion',
+   desc:"Consigne le débat des réunions du collectif et les décisions prises.",
+   fields:[
+     {key:'lieuDate', label:'Lieu et date de la réunion', type:'text'},
+     {key:'ordreJour', label:'Ordre du jour', type:'textarea'},
+     {key:'president', label:'Président de séance', type:'text'},
+     {key:'secretaire', label:'Secrétaire de séance', type:'text'},
+     {key:'heureOuverture', label:"Heure d'ouverture", type:'text'},
+     {key:'synthese', label:'Synthèse des points', type:'textarea'},
+   ]},
+
+  {key:'inventaireFournitures', group:'Gestion matérielle', label:"Cahier d'inventaire des fournitures",
+   desc:"Enregistre chronologiquement les fournitures et le matériel didactique de l'école.",
+   fields:[
+     {key:'dateReception', label:'Date de réception', type:'date'},
+     {key:'designation', label:'Désignation', type:'text'},
+     {key:'quantiteEntree', label:"Quantité entrée", type:'number'},
+     {key:'quantiteSortie', label:'Quantité sortie', type:'number'},
+     {key:'observation', label:'Observation', type:'textarea'},
+   ]},
+  {key:'journalMaitres', group:'Gestion matérielle', label:'Registre des maîtres de semaine (journalier)',
+   desc:"Informe sur les activités menées dans l'établissement pendant chaque journée de classe.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'maitreDeSemaine', label:'Maître de semaine', type:'personnel'},
+     {key:'observations', label:'Observations de la journée', type:'textarea'},
+   ]},
+  {key:'visitesMedicales', group:'Gestion matérielle', label:'Cahier de visites médicales',
+   desc:"Assure le suivi sanitaire des élèves et des enseignants.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'eleveId', label:'Élève', type:'eleve'},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'centreSante', label:'Centre de santé', type:'text'},
+     {key:'diagnostics', label:'Diagnostics', type:'textarea'},
+     {key:'signatureMedecin', label:'Signature du médecin traitant', type:'text'},
+   ]},
+
+  {key:'leconsModeles', group:'Pédagogie', label:'Registre des leçons modèles',
+   desc:"Leçon préparée par un enseignant choisi par le directeur devant ses collègues.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'discipline', label:'Discipline', type:'text'},
+     {key:'titreLecon', label:'Titre de la leçon', type:'text'},
+     {key:'partieAdministrative', label:'Partie administrative', type:'textarea'},
+     {key:'partiePedagogique', label:'Partie pédagogique', type:'textarea'},
+     {key:'remarques', label:'Remarques', type:'textarea'},
+   ]},
+  {key:'directivesPedagogiques', group:'Pédagogie', label:'Registre des directives pédagogiques',
+   desc:"Remarques d'ordre pédagogique et académique adressées au personnel.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'discipline', label:'Discipline', type:'text'},
+     {key:'titreLecon', label:'Titre de la leçon', type:'text'},
+     {key:'partieAdministrative', label:'Partie administrative', type:'textarea'},
+     {key:'partiePedagogique', label:'Partie pédagogique', type:'textarea'},
+     {key:'remarques', label:'Remarques', type:'textarea'},
+   ]},
+  {key:'tableauSynoptique', group:'Pédagogie', label:'Tableau synoptique (personnel)',
+   desc:"Corps, fonction, engagement et situation familiale du personnel.",
+   fields:[
+     {key:'personnelId', label:'Personnel', type:'personnel'},
+     {key:'corps', label:'Corps', type:'text'},
+     {key:'fonction', label:'Fonction', type:'text'},
+     {key:'dateEngagement', label:"Date d'engagement", type:'date'},
+     {key:'dateArrivee', label:"Date d'arrivée", type:'date'},
+     {key:'nombreEnfants', label:"Nombre d'enfants", type:'number'},
+     {key:'observation', label:'Observation', type:'textarea'},
+   ]},
+  {key:'planEtude', group:'Pédagogie', label:"Plan d'étude / horaires par matière",
+   desc:"Horaires hebdomadaires par matière et par cours (C.P, C.E, C.M).",
+   fields:[
+     {key:'matiere', label:'Matière', type:'text', required:true},
+     {key:'horaireCP', label:'Horaire C.P', type:'text'},
+     {key:'horaireCE', label:'Horaire C.E', type:'text'},
+     {key:'horaireCM', label:'Horaire C.M', type:'text'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'avancementProgramme', group:'Pédagogie', label:"Cahier d'état d'avancement des programmes",
+   desc:"Suivi mensuel du nombre de leçons prévues, exécutées et restantes par matière.",
+   fields:[
+     {key:'matiere', label:'Matière', type:'text', required:true},
+     {key:'mois', label:'Mois', type:'text'},
+     {key:'leconsPrevues', label:'Nombre de leçons prévues', type:'number'},
+     {key:'leconsExecutees', label:'Nombre de leçons exécutées', type:'number'},
+     {key:'leconsRestantes', label:'Nombre de leçons restantes', type:'number'},
+     {key:'pourcentage', label:"% d'exécution", type:'text'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'notesEvaluations', group:'Pédagogie', label:'Cahier des notes des évaluations',
+   desc:"Moyennes mensuelles, trimestrielles et annuelles par élève et par matière.",
+   fields:[
+     {key:'eleveId', label:'Élève', type:'eleve', required:true},
+     {key:'matiere', label:'Matière', type:'text'},
+     {key:'mois', label:'Mois', type:'text'},
+     {key:'moyenneMensuelle', label:'Moyenne mensuelle', type:'number'},
+     {key:'rangMensuel', label:'Rang', type:'text'},
+     {key:'moyenneTrimestrielle', label:'Moyenne trimestrielle', type:'number'},
+     {key:'rangTrimestriel', label:'Rang', type:'text'},
+     {key:'moyenneAnnuelle', label:'Moyenne annuelle', type:'number'},
+     {key:'rangAnnuel', label:'Rang', type:'text'},
+   ]},
+  {key:'moyennesCentralisees', group:'Pédagogie', label:'Registre centralisateur des moyennes et adresses',
+   desc:"Moyennes de tous les élèves de l'établissement, rang, admission ou redoublement.",
+   fields:[
+     {key:'eleveId', label:'Élève', type:'eleve', required:true},
+     {key:'adresseTuteur', label:'Adresse du tuteur', type:'text'},
+     {key:'moyenne1erTrim', label:'Moyenne 1er trimestre', type:'number'},
+     {key:'moyenne2eTrim', label:'Moyenne 2ème trimestre', type:'number'},
+     {key:'moyenne3eTrim', label:'Moyenne 3ème trimestre', type:'number'},
+     {key:'moyenneAnnuelle', label:'Moyenne annuelle', type:'number'},
+     {key:'rang', label:'Rang', type:'text'},
+     {key:'observation', label:'Observation (Admis / Redouble)', type:'select', options:['Admis','Redouble','']},
+   ]},
+  {key:'tableauHonneur', group:'Pédagogie', label:"Tableau d'honneur (moyenne 8,10 et plus)",
+   desc:"Élèves distingués par trimestre pour leur moyenne.",
+   fields:[
+     {key:'eleveId', label:'Élève', type:'eleve', required:true},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'trimestre', label:'Trimestre', type:'select', options:['1er trimestre','2ème trimestre','3ème trimestre','Annuelle']},
+     {key:'moyenne', label:'Moyenne', type:'number'},
+     {key:'rang', label:'Rang', type:'text'},
+     {key:'photo', label:'Référence photo', type:'text'},
+   ]},
+
+  {key:'recrutementPrevisionnel', group:'Statistiques & effectifs', label:'Recrutement prévisionnel en 1ère année',
+   desc:"Effectif total et proportion de filles attendus en 1ère année.",
+   fields:[
+     {key:'total', label:'Total', type:'number'},
+     {key:'filles', label:'Filles', type:'number'},
+     {key:'pourcentageFilles', label:'% Filles', type:'text'},
+   ]},
+  {key:'situationEffectifs', group:'Statistiques & effectifs', label:'Situation des effectifs et passage en classe supérieure',
+   desc:"Effectifs inscrits, ayant composé, moyenne obtenue et taux de réussite par classe.",
+   fields:[
+     {key:'classe', label:'Classe (ex : CP1 A, CE2 B...)', type:'text', required:true},
+     {key:'effectifInscritT', label:'Effectif inscrit (Total)', type:'number'},
+     {key:'effectifInscritF', label:'Effectif inscrit (Filles)', type:'number'},
+     {key:'ontComposeT', label:'Ont composé (Total)', type:'number'},
+     {key:'ontComposeF', label:'Ont composé (Filles)', type:'number'},
+     {key:'ontMoyenneT', label:'Ont la moyenne (Total)', type:'number'},
+     {key:'ontMoyenneF', label:'Ont la moyenne (Filles)', type:'number'},
+     {key:'pctReussiteT', label:'% Réussite (Total)', type:'text'},
+     {key:'pctReussiteF', label:'% Réussite (Filles)', type:'text'},
+   ]},
+  {key:'tableauEffectifs', group:'Statistiques & effectifs', label:'Tableau des effectifs (inscrits, promus, redoublants)',
+   desc:"Répartition par classe et par sexe des inscrits, promus et redoublants.",
+   fields:[
+     {key:'classe', label:'Classe', type:'text', required:true},
+     {key:'groupePedagogique', label:'Nombre de groupe pédagogique', type:'text'},
+     {key:'inscritsF', label:'Inscrits — Filles', type:'number'},
+     {key:'inscritsG', label:'Inscrits — Garçons', type:'number'},
+     {key:'promusF', label:'Promus — Filles', type:'number'},
+     {key:'promusG', label:'Promus — Garçons', type:'number'},
+     {key:'redoublantsF', label:'Redoublants — Filles', type:'number'},
+     {key:'redoublantsG', label:'Redoublants — Garçons', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'statistiqueAges', group:'Statistiques & effectifs', label:'Tableau statistique des âges par sexe',
+   desc:"Répartition des effectifs (filles / garçons) par tranche d'âge.",
+   fields:[
+     {key:'age', label:'Âge', type:'text', required:true},
+     {key:'filles', label:'Filles', type:'number'},
+     {key:'garcons', label:'Garçons', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'tableauScolarite', group:'Statistiques & effectifs', label:'Tableau de scolarité (primaire, collège, lycée)',
+   desc:"Durée de scolarité des élèves par cycle et par niveau.",
+   fields:[
+     {key:'cycle', label:'Cycle', type:'select', options:['Primaire','Collège','Lycée'], required:true},
+     {key:'niveauOuDuree', label:'Niveau / durée (ex : CP1, 7ème année, 1 an...)', type:'text', required:true},
+     {key:'filles', label:'Filles', type:'number'},
+     {key:'garcons', label:'Garçons', type:'number'},
+     {key:'total', label:'Total', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+
+  {key:'presencesPersonnel', group:"Vie de l'établissement", label:'Cahier de contrôle des présences du personnel',
+   desc:"Heures et jours d'absence, sanctions éventuelles du personnel.",
+   fields:[
+     {key:'personnelId', label:'Personnel', type:'personnel', required:true},
+     {key:'fonction', label:'Fonction', type:'text'},
+     {key:'heuresAbsence', label:"Heures d'absence", type:'number'},
+     {key:'joursAbsence', label:"Jours d'absence", type:'number'},
+     {key:'sanctions', label:'Sanctions', type:'text'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'centralisateurMoyennesPersonnel', group:"Vie de l'établissement", label:'Registre centralisateur des adresses (personnel)',
+   desc:"Adresse et contact du personnel, utile en cas d'urgence.",
+   fields:[
+     {key:'personnelId', label:'Personnel', type:'personnel', required:true},
+     {key:'adresse', label:'Adresse', type:'text'},
+     {key:'contact', label:'Contact', type:'text'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'planAction', group:"Vie de l'établissement", label:"Plan d'action",
+   desc:"Activités programmées, objectifs visés et responsables.",
+   fields:[
+     {key:'activite', label:'Activité', type:'text', required:true},
+     {key:'periode', label:'Période', type:'text'},
+     {key:'objectifVise', label:'Objectif visé', type:'textarea'},
+     {key:'moyenneRealisation', label:'Moyenne de réalisation', type:'text'},
+     {key:'responsables', label:"Responsables de l'activité", type:'text'},
+     {key:'resultatAttendu', label:'Résultat attendu', type:'text'},
+     {key:'lieu', label:"Lieu de l'activité", type:'text'},
+   ]},
+  {key:'encadrementRapproche', group:"Vie de l'établissement", label:"Cahier d'encadrement rapproché",
+   desc:"Suivi pédagogique rapproché d'un enseignant sur une leçon donnée.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'personnelId', label:'Enseignant encadré', type:'personnel'},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'discipline', label:'Discipline', type:'text'},
+     {key:'titreLecon', label:'Titre de la leçon', type:'text'},
+     {key:'partieAdmise', label:'Partie admise', type:'textarea'},
+     {key:'partiePedagogique', label:'Partie pédagogique', type:'textarea'},
+     {key:'remarque', label:'Remarque', type:'textarea'},
+   ]},
+  {key:'collecteFondsAPEAE', group:"Vie de l'établissement", label:'Tableau de collecte de fonds APEAE',
+   desc:"Cotisations versées par les parents (APEAE) par élève et par classe.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'eleveId', label:'Élève', type:'eleve'},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'montantVerse', label:'Montant versé', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+
+  // ---- Rapport de rentrée scolaire ----
+  {key:'previsionEffectifsRentree', group:'Rapport de rentrée scolaire', label:'Prévision des effectifs pour la rentrée prochaine',
+   desc:"Redoublants, promus et total prévus par niveau, avec nombre de groupes pédagogiques.",
+   fields:[
+     {key:'classe', label:'Niveau (ex : CP1 A, CE2 B...)', type:'text', required:true},
+     {key:'redoublantsT', label:'Redoublants (Total)', type:'number'},
+     {key:'redoublantsF', label:'Redoublants (Filles)', type:'number'},
+     {key:'promusT', label:'Promus (Total)', type:'number'},
+     {key:'promusF', label:'Promus (Filles)', type:'number'},
+     {key:'totalT', label:'Total (Total)', type:'number'},
+     {key:'totalF', label:'Total (Filles)', type:'number'},
+     {key:'nombreGP', label:'Nombre de GP', type:'text'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'situationAbandons', group:'Rapport de rentrée scolaire', label:'Situation des abandons',
+   desc:"Nombre d'abandons par année d'étude, taux, et cause.",
+   fields:[
+     {key:'anneeEtude', label:"Année d'étude", type:'select', options:['1ère Année','2ème Année','3ème Année','4ème Année','5ème Année','6ème Année']},
+     {key:'totalAbandons', label:'Total abandons', type:'number'},
+     {key:'fillesAbandons', label:'Filles', type:'number'},
+     {key:'taux', label:'Taux', type:'text'},
+     {key:'commentaireCause', label:"Commentaire (cause d'abandon)", type:'textarea'},
+   ]},
+  {key:'examensCEE', group:'Rapport de rentrée scolaire', label:"Examens du Certificat d'Études Élémentaires (par session)",
+   desc:"Candidats présentés et admis par session (année).",
+   fields:[
+     {key:'session', label:'Session (année)', type:'text', required:true},
+     {key:'candidatsPresentesF', label:'Présentés — Filles', type:'number'},
+     {key:'candidatsPresentesG', label:'Présentés — Garçons', type:'number'},
+     {key:'candidatsPresentesT', label:'Présentés — Total', type:'number'},
+     {key:'candidatsAdmisF', label:'Admis — Filles', type:'number'},
+     {key:'candidatsAdmisG', label:'Admis — Garçons', type:'number'},
+     {key:'candidatsAdmisT', label:'Admis — Total', type:'number'},
+   ]},
+  {key:'resultatCEE', group:'Rapport de rentrée scolaire', label:"Résultat de l'examen du Certificat d'Étude Élémentaire",
+   desc:"Résumé annuel : candidats, évalués, admis, % de réussite.",
+   fields:[
+     {key:'candidatsT', label:'Candidats — Total', type:'number'},
+     {key:'candidatsF', label:'Candidats — Filles', type:'number'},
+     {key:'evalueesT', label:'Évaluées — Total', type:'number'},
+     {key:'evalueesF', label:'Évaluées — Filles', type:'number'},
+     {key:'admisT', label:'Admis — Total', type:'number'},
+     {key:'admisF', label:'Admis — Filles', type:'number'},
+     {key:'pctReussiteT', label:'% Réussite — Total', type:'text'},
+     {key:'pctReussiteF', label:'% Réussite — Filles', type:'text'},
+   ]},
+  {key:'sallesClasses', group:'Rapport de rentrée scolaire', label:'Salles de classes (existantes / utilisées)',
+   desc:"Nombre de salles de classe existantes et utilisées.",
+   fields:[
+     {key:'type', label:'Type', type:'select', options:['Salles de classes existantes','Salles de classes utilisées']},
+     {key:'nombre', label:'Nombre', type:'number'},
+   ]},
+  {key:'situationEnseignantsRentree', group:'Rapport de rentrée scolaire', label:'Situation des enseignants (classes tenues)',
+   desc:"Classes tenues, effectifs, nombre de GP et mode de fonctionnement par enseignant.",
+   fields:[
+     {key:'personnelId', label:'Enseignant', type:'personnel', required:true},
+     {key:'contact', label:'Contact', type:'text'},
+     {key:'classesEtEffectifs', label:'Classes tenues et effectifs (CP1 à CM2, T/F)', type:'textarea'},
+     {key:'nombreGP', label:'Nombre de GP', type:'text'},
+     {key:'modeFonctionnement', label:'Mode de fonctionnement', type:'select', options:['Normal','Double flux','CMG']},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'repartitionEnseignantsPromotion', group:'Rapport de rentrée scolaire', label:'Répartition des enseignants par promotion',
+   desc:"Diplômes, classe tenue et personne à contacter en cas de besoin.",
+   fields:[
+     {key:'personnelId', label:'Enseignant', type:'personnel', required:true},
+     {key:'diplomeAcademique', label:'Diplôme académique', type:'text'},
+     {key:'diplomeProfessionnel', label:'Diplôme professionnel', type:'text'},
+     {key:'classeTenue', label:'Classe tenue', type:'text'},
+     {key:'personneContact', label:'Personne à contacter en cas de besoin', type:'text'},
+   ]},
+  {key:'reunionsPersonnel', group:'Rapport de rentrée scolaire', label:'Réunions avec le personnel (formation, dotation, objectifs)',
+   desc:"Formation des enseignants, dotation en fournitures, objectifs et événements de la rentrée.",
+   fields:[
+     {key:'dateFormation', label:'Date de la formation', type:'date'},
+     {key:'modulesAbordes', label:'Modules abordés', type:'textarea'},
+     {key:'dateDotation', label:'Date de dotation en fournitures', type:'date'},
+     {key:'quantiteSuffisante', label:'Quantité suffisante ?', type:'select', options:['Oui','Non']},
+     {key:'objectifsAnnee', label:"Objectifs fixés pour l'année", type:'textarea'},
+     {key:'evenementsRentree', label:'Événements enregistrés pendant la rentrée', type:'textarea'},
+     {key:'problemesEleves', label:'Problèmes rencontrés — Élèves', type:'textarea'},
+     {key:'problemesEnseignants', label:'Problèmes rencontrés — Enseignants', type:'textarea'},
+     {key:'problemesPersonnelEntretien', label:"Problèmes rencontrés — Personnel d'entretien", type:'textarea'},
+   ]},
+  {key:'problemesPerspectives', group:'Rapport de rentrée scolaire', label:'Problèmes rencontrés, résolus et perspectives',
+   desc:"Bilan des problèmes de l'année et perspectives d'amélioration.",
+   fields:[
+     {key:'date', label:'Date', type:'date'},
+     {key:'problemesRencontres', label:'Problèmes rencontrés', type:'textarea'},
+     {key:'problemesResolusSolutions', label:'Problèmes résolus — Solutions', type:'textarea'},
+     {key:'problemesNonResolus', label:'Problèmes non résolus', type:'textarea'},
+     {key:'perspectives', label:'Perspectives (innovations utiles)', type:'textarea'},
+   ]},
+
+  // ---- Rapport de fin d'année scolaire ----
+  {key:'identificationEtablissement', group:"Rapport de fin d'année scolaire", label:"Identification de l'établissement",
+   desc:"Renseignements généraux sur l'établissement et le directeur.",
+   fields:[
+     {key:'etablissement', label:'Établissement', type:'text', required:true},
+     {key:'code', label:'Code', type:'text'},
+     {key:'effectifF', label:'Effectif Filles', type:'number'},
+     {key:'effectifG', label:'Effectif Garçons', type:'number'},
+     {key:'effectifT', label:'Effectif Total', type:'number'},
+     {key:'dsce', label:'DSCE', type:'text'},
+     {key:'directeurNomPrenom', label:'Directeur — Nom et Prénoms', type:'text'},
+     {key:'directeurDiplomeAcademique', label:'Directeur — Diplôme académique', type:'text'},
+     {key:'directeurDiplomeProfessionnel', label:'Directeur — Diplôme professionnel', type:'text'},
+     {key:'directeurAnneeExperience', label:"Directeur — Années d'expérience à ce poste", type:'text'},
+   ]},
+  {key:'personnelRentree', group:"Rapport de fin d'année scolaire", label:'Effectif du personnel (par catégorie)',
+   desc:"Personnel en situation de classe, administratif, d'entretien, autres.",
+   fields:[
+     {key:'categorie', label:'Catégorie', type:'select', options:['En situation de classe','Administratif',"d'Entretien",'Autres personnels']},
+     {key:'total', label:'Total', type:'number'},
+     {key:'filles', label:'F', type:'number'},
+     {key:'hommes', label:'H', type:'number'},
+   ]},
+  {key:'effectifElevesRentree', group:"Rapport de fin d'année scolaire", label:'Effectif des élèves (promus, redoublants, sortie)',
+   desc:"Par niveau : promus, redoublants, total, présents à la rentrée et sorties.",
+   fields:[
+     {key:'rubrique', label:'Rubrique', type:'select', options:['Promus','Redoublants','Total']},
+     {key:'classe', label:'Classe', type:'select', options:['CP1','CP2','CE1','CE2','CM1','CM2']},
+     {key:'totalEleves', label:'Total', type:'number'},
+     {key:'filles', label:'Filles', type:'number'},
+     {key:'presentRentreeT', label:'Présent à la rentrée (Total)', type:'number'},
+     {key:'presentRentreeF', label:'Présent à la rentrée (Filles)', type:'number'},
+     {key:'sortieT', label:'Sortie (Total)', type:'number'},
+     {key:'sortieF', label:'Sortie (Filles)', type:'number'},
+   ]},
+  {key:'effectifPersonnelEnseignant', group:"Rapport de fin d'année scolaire", label:'Effectif de tout le personnel enseignant',
+   desc:"Femmes, hommes, total et groupe pédagogique par classe.",
+   fields:[
+     {key:'categorie', label:'Catégorie', type:'select', options:['Femmes','Hommes','Total','Groupe Pédagogique']},
+     {key:'classe', label:'Classe', type:'select', options:['CP1','CP2','CE1','CE2','CM1','CM2','Total']},
+     {key:'valeur', label:'Valeur', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'documentsNecessairesRentree', group:"Rapport de fin d'année scolaire", label:'Documents et registres nécessaires pour la rentrée',
+   desc:"Registre d'appel, répartition mensuelle, programme officiel, emploi du temps...",
+   fields:[
+     {key:'document', label:'Document', type:'select', options:["Registre d'appel",'Répartition mensuelle du programme','Programme officiel','Emploi du temps','Cahier de préparation à jour','Dictionnaire']},
+     {key:'classe', label:'Classe', type:'select', options:['CP1','CP2','CE1','CE2','CM1','CM2','Total']},
+     {key:'quantite', label:'Quantité', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'infrastructuresEtat', group:"Rapport de fin d'année scolaire", label:'Infrastructures — état (utilisé / non utilisé)',
+   desc:"Salle de classe, bureau directeur, WC, logement, magasin, source d'eau, clôture, terrain de sport, bâtiment.",
+   fields:[
+     {key:'typeInfrastructure', label:"Type d'infrastructure", type:'text', required:true},
+     {key:'bonEtatUtilise', label:'Bon état — Utilisé', type:'number'},
+     {key:'bonEtatNonUtilise', label:'Bon état — Non utilisé', type:'number'},
+     {key:'mauvaisEtatUtilise', label:'Mauvais état — Utilisé', type:'number'},
+     {key:'mauvaisEtatNonUtilise', label:'Mauvais état — Non utilisé', type:'number'},
+     {key:'total', label:'Total', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'mobiliersEquipements', group:"Rapport de fin d'année scolaire", label:'Mobiliers et équipements',
+   desc:"Tables/bureaux, chaises, tables-bancs, tableaux, armoires, étagères, bibliothèque, ordinateur, imprimante, matériel audiovisuel.",
+   fields:[
+     {key:'designation', label:'Désignation', type:'text', required:true},
+     {key:'bonEtatUtilise', label:'Bon état — Utilisé', type:'number'},
+     {key:'bonEtatNonUtilise', label:'Bon état — Non utilisé', type:'number'},
+     {key:'mauvaisEtatUtilise', label:'Mauvais état — Utilisé', type:'number'},
+     {key:'mauvaisEtatNonUtilise', label:'Mauvais état — Non utilisé', type:'number'},
+     {key:'total', label:'Total', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'dispositionsRentree', group:"Rapport de fin d'année scolaire", label:'Dispositions prises pour la rentrée (matériel didactique)',
+   desc:"Dictionnaires, cartes, planches, matériel de sport (ballon, sifflet, javelot...).",
+   fields:[
+     {key:'designation', label:'Désignation', type:'text', required:true},
+     {key:'bonEtatUtilise', label:'Bon état — Utilisé', type:'number'},
+     {key:'bonEtatNonUtilise', label:'Bon état — Non utilisé', type:'number'},
+     {key:'mauvaisEtatUtilise', label:'Mauvais état — Utilisé', type:'number'},
+     {key:'mauvaisEtatNonUtilise', label:'Mauvais état — Non utilisé', type:'number'},
+     {key:'total', label:'Total', type:'number'},
+   ]},
+  {key:'infrastructuresBesoin', group:"Rapport de fin d'année scolaire", label:'Infrastructures — existe / besoin',
+   desc:"Salle de classe, bureaux, logement, magasin, latrine, points d'eau, aire de jeu, clôture.",
+   fields:[
+     {key:'typeInfrastructure', label:"Type d'infrastructure", type:'select', options:['Salle de classe','Bureaux','Logement','Magasin','Latrine','Points d\'eau','Aire de jeu','Clôture']},
+     {key:'existe', label:'Existe', type:'number'},
+     {key:'besoin', label:'Besoin', type:'number'},
+   ]},
+  {key:'mobiliersBesoin', group:"Rapport de fin d'année scolaire", label:'Mobiliers — total / bon état / besoin',
+   desc:"Tables-bancs, tables-bureaux, chaises, armoires, étagères, salon.",
+   fields:[
+     {key:'designation', label:'Désignation', type:'select', options:['Tables bancs','Tables bureaux','Chaises','Armoires','Étagères','Salon','Tableau à reprendre']},
+     {key:'total', label:'Total', type:'number'},
+     {key:'bonEtat', label:'Bon état', type:'number'},
+     {key:'besoin', label:'Besoin', type:'number'},
+   ]},
+  {key:'fournituresCollectives', group:"Rapport de fin d'année scolaire", label:'Fournitures scolaires à usage collectif',
+   desc:"Règles, équerres, compas, dictionnaires, cartes, globes, maquettes, etc.",
+   fields:[
+     {key:'designation', label:'Désignation', type:'text', required:true},
+     {key:'existant', label:'Existant', type:'number'},
+     {key:'besoin', label:'Besoin', type:'number'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+  {key:'situationManuelsLibrairie', group:"Rapport de fin d'année scolaire", label:'Situation des manuels à la librairie',
+   desc:"Français, Calcul, Histoire, Géographie, ECM, Science d'observation — total, bon état, besoin.",
+   fields:[
+     {key:'matiere', label:'Matière', type:'select', options:['Français','Calcul','Histoire','Géographie','ECM',"Science d'observation"]},
+     {key:'total', label:'Total', type:'number'},
+     {key:'bonEtat', label:'Bon état', type:'number'},
+     {key:'besoin', label:'Besoin', type:'number'},
+   ]},
+  {key:'enqueteValeurs', group:"Rapport de fin d'année scolaire", label:"Enquête de valeurs de l'enseignant(e)",
+   desc:"Pratiques pédagogiques, conscience professionnelle, respect des droits de l'enfant.",
+   fields:[
+     {key:'personnelId', label:'Enseignant', type:'personnel', required:true},
+     {key:'classe', label:'Classe', type:'text'},
+     {key:'effectifF', label:'Effectif présents — Filles', type:'number'},
+     {key:'effectifG', label:'Effectif présents — Garçons', type:'number'},
+     {key:'effectifT', label:'Effectif présents — Total', type:'number'},
+     {key:'pratiquesPedagogiques', label:'A. Pratiques pédagogiques (appréciation)', type:'textarea'},
+     {key:'conscienceProfessionnelle', label:'B. Conscience professionnelle, intégrité (appréciation)', type:'textarea'},
+     {key:'respectDroitsEnfant', label:"C. Respect des droits fondamentaux de l'enfant (appréciation)", type:'textarea'},
+     {key:'observation', label:'Observation', type:'text'},
+   ]},
+
+  // ---- Inspection & suivi du directeur ----
+  {key:'bulletinInspectionMaitre', group:'Inspection & suivi du directeur', label:"Bulletin d'inspection du maître/de la maîtresse",
+   desc:"Renseignements généraux, avancement du programme et titre de la leçon inspectée.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e) inspecté(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'niveauAcademique', label:'Niveau académique', type:'text'},
+     {key:'grade', label:'Grade', type:'text'},
+     {key:'ecoleFormation', label:'École de formation', type:'text'},
+     {key:'ancienneteService', label:'Ancienneté de service', type:'text'},
+     {key:'etatAvancementProgramme', label:'État d\'avancement du programme', type:'select', options:['Conforme','En retard','En avance']},
+     {key:'pourcentage', label:'Pourcentage', type:'text'},
+     {key:'classeTenue', label:'Classe tenue', type:'text'},
+     {key:'effectifInscrit', label:'Effectif inscrit', type:'number'},
+     {key:'effectifFilles', label:'dont Filles', type:'number'},
+     {key:'titreLecon', label:'Titre de la leçon', type:'text'},
+     {key:'duree', label:'Durée', type:'text'},
+     {key:'semaineNo', label:'Semaine N°', type:'text'},
+     {key:'competencesSpecifiques', label:'Compétences spécifiques', type:'textarea'},
+     {key:'indicateursEvaluation', label:"Indicateurs d'évaluation", type:'textarea'},
+     {key:'methodeUtilisee', label:'Méthode utilisée', type:'text'},
+     {key:'techniquesEnseignement', label:"Techniques d'enseignement utilisées", type:'text'},
+   ]},
+  {key:'inspectionTenueDocuments', group:'Inspection & suivi du directeur', label:'Inspection — Tenue des documents pédagogiques',
+   desc:"Niveau atteint (0 à 4) par document pédagogique, lors d'une inspection.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'document', label:'Document', type:'select', options:['Programme','Répartition annuelle','Emploi du temps','Cahier de préparation','Cahier d\'évaluation','Registre d\'appel journalier','Cahier de roulement','Cahier de remarques pédagogiques','Tableau d\'honneur','Livret scolaire','Cahier d\'encadrement rapproché','Cahier journal de classe']},
+     {key:'niveauAtteint', label:'Niveau atteint (0-4)', type:'select', options:['0','1','2','3','4']},
+   ]},
+  {key:'inspectionPreparationEcrite', group:'Inspection & suivi du directeur', label:'Inspection — Préparation écrite',
+   desc:"Niveau atteint (0 à 4) pour chaque critère de la préparation écrite.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'critere', label:'Critère', type:'select', options:['Planification selon l\'approche par compétences','Pré requis','Matériel didactique','Mise en situation','Apport notionnel','Réinvestissement','Qualité rédactionnelle de la préparation','Bilan']},
+     {key:'niveauAtteint', label:'Niveau atteint (0-4)', type:'select', options:['0','1','2','3','4']},
+   ]},
+  {key:'inspectionPratiqueClasse', group:'Inspection & suivi du directeur', label:'Inspection — Pratique de classe',
+   desc:"Niveau atteint (0 à 4) pour chaque volet observé pendant la leçon.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'critere', label:'Critère', type:'select', options:['Contrôle du Pré requis','Motivation','Expression orale','Utilisation du matériel didactique','Respect de la progression','Activités d\'apprentissage','Réinvestissement']},
+     {key:'niveauAtteint', label:'Niveau atteint (0-4)', type:'select', options:['0','1','2','3','4']},
+   ]},
+  {key:'inspectionMaterielClasse', group:'Inspection & suivi du directeur', label:'Inspection — Matériel et spatiale de la classe',
+   desc:"Niveau atteint (0 à 4) pour l'organisation matérielle et l'affichage de la classe.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'critere', label:'Critère', type:'select', options:['Salle de classe','Liste Nominative des élèves','Tenue des élèves','Tenue de l\'enseignant(e)','Mobiliers scolaires/équipements','Tableau de balayage','Tableau de chants et récitations','Décoration pédagogique de la classe','Tableau de présences des élèves','Tableau de scolarité','Tableau des âges','Règlement intérieur de la classe']},
+     {key:'niveauAtteint', label:'Niveau atteint (0-4)', type:'select', options:['0','1','2','3','4']},
+   ]},
+  {key:'inspectionSynthese', group:'Inspection & suivi du directeur', label:"Inspection — Synthèse, remédiation et note",
+   desc:"Remédiation envisagée, appréciations générales et note finale (/100) d'une inspection.",
+   fields:[
+     {key:'personnelId', label:'Enseignant(e)', type:'personnel', required:true},
+     {key:'date', label:'Date', type:'date'},
+     {key:'remediationEnvisagee', label:'Remédiation envisagée', type:'textarea'},
+     {key:'appreciationsGenerales', label:'Appréciations générales', type:'textarea'},
+     {key:'observation', label:'Observation', type:'textarea'},
+     {key:'note', label:'Note (/100)', type:'number'},
+   ]},
+  {key:'bulletinSuiviDirecteur', group:'Inspection & suivi du directeur', label:"Bulletin de suivi-évaluation du directeur — identification",
+   desc:"Identification de l'école, du directeur et renseignements généraux (bâtiments, effectifs, normes pédagogiques).",
+   fields:[
+     {key:'directeurId', label:'Directeur', type:'personnel', required:true},
+     {key:'delegationScolaire', label:'Délégation scolaire', type:'text'},
+     {key:'ecolePrimaire', label:'École primaire', type:'text'},
+     {key:'dateCreation', label:'Date de création', type:'date'},
+     {key:'numArreteOuverture', label:"N° arrêté d'ouverture", type:'text'},
+     {key:'dateOuverture', label:"Date d'ouverture", type:'date'},
+     {key:'dateEngagement', label:"Date d'engagement", type:'date'},
+     {key:'dateNominationPoste', label:'Date de nomination au poste', type:'date'},
+     {key:'ancienneteFonction', label:'Ancienneté dans la fonction', type:'text'},
+     {key:'nombreBatiments', label:'Nombre de bâtiments', type:'number'},
+     {key:'nombreSallesClasses', label:'Nombre de salles de classes', type:'number'},
+     {key:'nombreGroupesPedagogiques', label:'Nombre de groupes pédagogiques', type:'number'},
+     {key:'effectifEleves', label:'Effectif des élèves', type:'number'},
+     {key:'effectifFilles', label:'dont Filles', type:'number'},
+     {key:'effectifPersonnel', label:'Effectif du personnel', type:'number'},
+     {key:'enSituationClasse', label:'En situation de classe', type:'number'},
+     {key:'ratioElevesGroupes', label:'Ratio élèves/groupes pédagogiques', type:'text'},
+     {key:'normesPedagogiques', label:'Respect des normes pédagogiques', type:'select', options:['1 Maître par groupe','2 Maîtres par groupe','1 Maître par 2 groupes','1 Maître par 3 groupes','Plus de 2 Maîtres par groupe']},
+   ]},
+  {key:'documentsPedagogiquesAdmin', group:'Inspection & suivi du directeur', label:'Documents pédagogiques et administratifs (existence)',
+   desc:"Existence, fonctionnalité et appréciation de chaque registre/document de l'école.",
+   fields:[
+     {key:'document', label:'Document', type:'text', required:true},
+     {key:'existence', label:'Existence', type:'select', options:['Oui','Non']},
+     {key:'fonctionnalite', label:'Fonctionnalité', type:'select', options:['Oui','Non']},
+     {key:'appreciation', label:'Appréciation', type:'text'},
+   ]},
+  {key:'encadrementRapprocheBilan', group:'Inspection & suivi du directeur', label:'Encadrement rapproché — bilan',
+   desc:"Nombre d'enseignants encadrés, outils utilisés, organisation des évaluations et note.",
+   fields:[
+     {key:'directeurId', label:'Directeur', type:'personnel'},
+     {key:'date', label:'Date', type:'date'},
+     {key:'nombreEnseignantsPrevu', label:'Enseignants à encadrer — Prévu', type:'number'},
+     {key:'nombreEnseignantsRealise', label:'Enseignants à encadrer — Réalisé', type:'number'},
+     {key:'calendrierExiste', label:"Calendrier d'encadrement existe", type:'select', options:['Oui','Non']},
+     {key:'outilsUtilises', label:'Outils utilisés', type:'text'},
+     {key:'pourcentageFemmes', label:'% Enseignants encadrés — Femmes', type:'text'},
+     {key:'pourcentageHommes', label:'% Enseignants encadrés — Hommes', type:'text'},
+     {key:'pourcentageTotal', label:'% Enseignants encadrés — Total', type:'text'},
+     {key:'testAccueil', label:"Test d'accueil organisé", type:'select', options:['Oui','Non']},
+     {key:'testMiParcours', label:'Test mi-parcours organisé', type:'select', options:['Oui','Non']},
+     {key:'testFinal', label:'Test final organisé', type:'select', options:['Oui','Non']},
+     {key:'note', label:'Note', type:'text'},
+     {key:'formateur', label:'Formateur', type:'text'},
+     {key:'appreciationsRecommandation', label:'Appréciations / Recommandation', type:'textarea'},
+   ]},
+  {key:'suiviPlansReussite', group:'Inspection & suivi du directeur', label:'Suivi des plans de réussite du directeur',
+   desc:"Indicateurs, résultats escomptés, résultats atteints et écarts pour chaque objectif du plan.",
+   fields:[
+     {key:'anneeScolaire', label:'Année scolaire', type:'text'},
+     {key:'titre', label:'Titre (objectif)', type:'text', required:true},
+     {key:'indicateur', label:'Indicateur', type:'textarea'},
+     {key:'resultatsEscomptes', label:'Résultats escomptés', type:'textarea'},
+     {key:'resultatsAtteints', label:'Résultats atteints', type:'textarea'},
+     {key:'ecartsRERA', label:'Écarts (RE - RA)', type:'textarea'},
+     {key:'commentairesObservations', label:'Commentaires et observations', type:'textarea'},
+   ]},
+];
+
+function groupedModules(){
+  const groups = [];
+  MODULES.forEach(m=>{
+    let g = groups.find(x=>x.name===m.group);
+    if(!g){ g = {name:m.group, items:[]}; groups.push(g); }
+    g.items.push(m);
+  });
+  return groups;
+}
+
+/* =========================================================================
+   ACCÈS AUX DONNÉES D'UN MODULE
+========================================================================= */
+function rowsOf(m){
+  if(m.scope==='global') return DB[m.key]; // eleves / personnel
+  if(!currentYearId) return [];
+  if(!DB.data[currentYearId]) DB.data[currentYearId] = {};
+  if(!DB.data[currentYearId][m.key]) DB.data[currentYearId][m.key] = [];
+  return DB.data[currentYearId][m.key];
+}
+
+/* =========================================================================
+   NAVIGATION
+========================================================================= */
+let currentModuleKey = 'dashboard';
+
+function initNav(){
+  const nav = document.getElementById('navContainer');
+  let html = `<div class="nav-group">
+    <div class="nav-item" data-key="dashboard" onclick="showModule('dashboard')">
+      <span class="n">◆</span> Tableau de bord
+    </div>
+  </div>`;
+  let counter = 1;
+  groupedModules().forEach(g=>{
+    html += `<div class="nav-group"><div class="nav-group-title">${g.name}</div>`;
+    g.items.forEach(m=>{
+      html += `<div class="nav-item" data-key="${m.key}" onclick="showModule('${m.key}')">
+        <span class="n">${String(counter).padStart(2,'0')}</span> ${m.label}
+      </div>`;
+      counter++;
+    });
+    html += `</div>`;
+  });
+  nav.innerHTML = html;
+}
+
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar'), open = sb.classList.toggle('open');
+  document.getElementById('sbBackdrop').style.display = open ? 'block' : 'none';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbBackdrop').style.display = 'none';
+}
+function showModule(key){
+  currentModuleKey = key;
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active', el.dataset.key===key);
+  });
+  renderCurrentModule();
+  if(window.innerWidth<=820) closeSidebar();
+}
+
+function renderCurrentModule(){
+  if(currentModuleKey==='dashboard') return renderDashboard();
+  const m = MODULES.find(x=>x.key===currentModuleKey);
+  if(!m) return;
+  document.getElementById('pageTitle').textContent = m.label;
+  document.getElementById('pageDesc').textContent = m.desc || '';
+  renderTable(m);
+}
+
+/* =========================================================================
+   DASHBOARD
+========================================================================= */
+function renderDashboard(){
+  document.getElementById('pageTitle').textContent = 'Tableau de bord';
+  document.getElementById('pageDesc').textContent = "Vue d'ensemble de l'établissement pour l'année sélectionnée";
+  const year = DB.annees.find(a=>a.id===currentYearId);
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    ${printHeaderHTML('Tableau de bord')}
+    <div class="grid-cards">
+      <div class="stat-card"><div class="num">${DB.eleves.length}</div><div class="lbl">Élèves enregistrés</div></div>
+      <div class="stat-card"><div class="num">${DB.personnel.length}</div><div class="lbl">Membres du personnel</div></div>
+      <div class="stat-card"><div class="num">${DB.annees.length}</div><div class="lbl">Années scolaires</div></div>
+      <div class="stat-card"><div class="num">${year? year.libelle : '—'}</div><div class="lbl">Année active</div></div>
+    </div>
+    <div style="margin-top:26px;" class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>28 rubriques du cahier de charges</h2>
+          <p>Toutes les données sont stockées uniquement sur cet appareil, sans connexion internet. Pensez à exporter une sauvegarde régulièrement (menu de gauche) pour ne rien perdre.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Rubrique</th><th>Groupe</th></tr></thead><tbody>
+          ${MODULES.map(m=>`<tr><td>${m.label}</td><td>${m.group}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================================
+   TABLE RENDERING
+========================================================================= */
+function printHeaderHTML(rubriqueLabel){
+  const year = DB.annees.find(a=>a.id===currentYearId);
+  const dateStr = new Date().toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'});
+  return `
+    <div class="print-header">
+      <div class="ph-left">
+        <div>MEPU-A</div>
+        <div>IRE : ${DB.ire||'Mamou'}</div>
+        <div>DPE : ${DB.dceOuDpe||'Mamou'}</div>
+        <div>DSE : ${DB.dsee||'Mamou'}</div>
+        <div class="ph-etab">ÉTABLISSEMENT : ${(DB.schoolName||'').toUpperCase()}</div>
+      </div>
+      ${DB.logo? `<div class="ph-right"><img src="${DB.logo}" class="ph-logo"></div>` : ''}
+      <div class="ph-official">
+        <div class="ph-country">RÉPUBLIQUE DE GUINÉE</div>
+        <div class="ph-motto">Travail — Justice — Solidarité</div>
+      </div>
+      <div class="ph-meta">
+        <span>${rubriqueLabel||''}</span>
+        <span>Année scolaire : ${year? year.libelle : '—'}</span>
+        <span>Imprimé le ${dateStr}</span>
+      </div>
+    </div>`;
+}
+
+function fieldDisplay(f, row){
+  const v = row[f.key];
+  if(f.type==='eleve') return eleveName(v);
+  if(f.type==='personnel') return personnelName(v);
+  if(v===undefined || v===null || v==='') return '—';
+  return v;
+}
+
+function renderTable(m){
+  const c = document.getElementById('content');
+  if(m.scope!=='global' && !currentYearId){
+    c.innerHTML = `<div class="panel"><div class="panel-head"><div><h2>${m.label}</h2>
+      <p>Créez d'abord une année scolaire pour commencer à saisir ce registre.</p>
+      <button class="btn-mini" style="margin-top:10px;" onclick="promptNewYear()">+ Créer l'année scolaire</button></div></div></div>`;
+    return;
+  }
+  const rows = rowsOf(m);
+  c.innerHTML = `
+    ${printHeaderHTML(m.label)}
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2>${m.label}</h2><p>${m.desc||''}</p></div>
+        <button class="btn gold no-print" onclick="openForm('${m.key}')">+ Ajouter</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>${m.fields.map(f=>`<th>${f.label}</th>`).join('')}<th class="no-print" style="width:80px;">Actions</th></tr></thead>
+          <tbody>
+            ${rows.length===0
+              ? `<tr class="empty-row"><td colspan="${m.fields.length+1}">Aucune ligne pour le moment. Cliquez sur « + Ajouter ».</td></tr>`
+              : rows.map(row=>`
+                <tr>
+                  ${m.fields.map(f=>`<td>${fieldDisplay(f,row)}</td>`).join('')}
+                  <td class="row-actions no-print">
+                    <button class="icon-btn" title="Modifier" onclick='openForm(${JSON.stringify(m.key)}, ${JSON.stringify(row.id)})'>✎</button>
+                    <button class="icon-btn del" title="Supprimer" onclick='deleteRow(${JSON.stringify(m.key)}, ${JSON.stringify(row.id)})'>✕</button>
+                  </td>
+                </tr>`).join('')
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function deleteRow(moduleKey, id){
+  const m = MODULES.find(x=>x.key===moduleKey);
+  if(!confirm('Supprimer définitivement cette ligne ?')) return;
+  const rows = rowsOf(m);
+  const idx = rows.findIndex(r=>r.id===id);
+  if(idx>-1) rows.splice(idx,1);
+  saveDB();
+  renderCurrentModule();
+  toast('Ligne supprimée');
+}
+
+/* =========================================================================
+   MODAL FORM (add/edit)
+========================================================================= */
+let formContext = {moduleKey:null, editId:null};
+
+function openForm(moduleKey, editId){
+  const m = MODULES.find(x=>x.key===moduleKey);
+  formContext = {moduleKey, editId: editId||null};
+  document.getElementById('modalTitle').textContent = (editId? 'Modifier — ':'Ajouter — ') + m.label;
+  const body = document.getElementById('modalBody');
+
+  const eleveOptions = () => DB.eleves.map(e=>`<option value="${e.id}">${e.prenom||''} ${e.nom||''} ${e.matricule? '('+e.matricule+')':''}</option>`).join('');
+  const personnelOptions = () => DB.personnel.map(p=>`<option value="${p.id}">${p.prenom||''} ${p.nom||''}</option>`).join('');
+
+  body.innerHTML = m.fields.map(f=>{
+    const isFull = f.type==='textarea';
+    let input = '';
+    if(f.type==='textarea'){
+      input = `<textarea name="${f.key}" ${f.required?'required':''}></textarea>`;
+    } else if(f.type==='date'){
+      input = `<input type="date" name="${f.key}" ${f.required?'required':''}>`;
+    } else if(f.type==='number'){
+      input = `<input type="number" step="any" name="${f.key}" ${f.required?'required':''}>`;
+    } else if(f.type==='eleve'){
+      input = `<select name="${f.key}" ${f.required?'required':''}><option value="">— Sélectionner un élève —</option>${eleveOptions()}</select>`;
+    } else if(f.type==='personnel'){
+      input = `<select name="${f.key}" ${f.required?'required':''}><option value="">— Sélectionner —</option>${personnelOptions()}</select>`;
+    } else if(f.type==='select'){
+      input = `<select name="${f.key}"><option value=""></option>${f.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+    } else {
+      input = `<input type="text" name="${f.key}" ${f.required?'required':''}>`;
+    }
+    return `<div class="field ${isFull?'full':''}"><label>${f.label}</label>${input}</div>`;
+  }).join('');
+
+  const form = document.getElementById('modalForm');
+  form.reset();
+  if(editId){
+    const rows = rowsOf(m);
+    const data = rows.find(r=>r.id===editId) || {};
+    m.fields.forEach(f=>{
+      const el = form.elements[f.key];
+      if(el) el.value = data[f.key] ?? '';
+    });
+  }
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+}
+
+document.getElementById('modalForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const m = MODULES.find(x=>x.key===formContext.moduleKey);
+  const fd = new FormData(e.target);
+  const data = {};
+  m.fields.forEach(f=>{
+    let v = fd.get(f.key);
+    if(f.type==='number') v = v===''? null : Number(v);
+    data[f.key] = v;
+  });
+  const rows = rowsOf(m);
+  if(formContext.editId){
+    const idx = rows.findIndex(r=>r.id===formContext.editId);
+    if(idx>-1) rows[idx] = {...rows[idx], ...data};
+  } else {
+    data.id = uid();
+    rows.push(data);
+  }
+  saveDB();
+  closeModal();
+  renderCurrentModule();
+  toast(formContext.editId? 'Modifications enregistrées' : 'Ajouté avec succès');
+});
+
+/* =========================================================================
+   DÉMARRAGE
+========================================================================= */
+function boot(){
+  loadDB();
+  document.getElementById('schoolNameLabel').textContent = (DB.schoolName||'ÉTABLISSEMENT').toUpperCase();
+  initNav();
+  renderYearSelect();
+  showModule('dashboard');
+}
+</script>
+<script type="module">
+/* ===== Configuration Firebase : collez ici votre config (Console Firebase > Paramètres du projet > Vos applications > Web) ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyA3agEZtZat5T2rwGB0C1sBPpg2Ti1C1jw",
+  authDomain: "gestion-ecole-petel.firebaseapp.com",
+  projectId: "gestion-ecole-petel",
+  storageBucket: "gestion-ecole-petel.firebasestorage.app",
+  messagingSenderId: "378410172827",
+  appId: "1:378410172827:web:0f9964163d30b3bc7ea13e"
+};
+/* ================================================================================================================================ */
+if(firebaseConfig.apiKey.indexOf('VOTRE')===0){
+  window.appNeedConfig();
+}else if(location.protocol==='file:'){
+  window.appFirebaseFailed("La connexion ne fonctionne pas depuis un fichier ouvert directement. Ouvrez l'appli depuis son adresse web (https://...).");
+}else try{
+  let answered = false;
+  setTimeout(()=>{ if(!answered) window.appFirebaseFailed('Connexion à Firebase impossible ou très lente. Vérifiez votre internet, ou continuez sans connexion.'); }, 8000);
+  const V='10.14.1', B='https://www.gstatic.com/firebasejs/'+V+'/';
+  const {initializeApp} = await import(B+'firebase-app.js');
+  const A = await import(B+'firebase-auth.js');
+  const F = await import(B+'firebase-firestore.js');
+  const app = initializeApp(firebaseConfig);
+  const auth = A.getAuth(app);
+  const db = F.initializeFirestore(app, {localCache: F.persistentLocalCache({tabManager: F.persistentMultipleTabManager()})});
+  window.fbAuthAction = (mode,email,pass)=>{
+    if(mode==='login')  return A.signInWithEmailAndPassword(auth,email,pass);
+    if(mode==='signup') return A.createUserWithEmailAndPassword(auth,email,pass);
+    if(mode==='reset')  return A.sendPasswordResetEmail(auth,email);
+    if(mode==='logout') return A.signOut(auth);
+  };
+  window.fbPull = async uid=>{
+    const snap = await F.getDocs(F.collection(db,'ecoles',uid,'parts'));
+    const parts = {}; snap.forEach(d=>{ parts[d.id] = d.data().json; });
+    return {parts, fromCache: snap.metadata.fromCache};
+  };
+  window.fbPush = async (uid, parts, last)=>{
+    const col = F.collection(db,'ecoles',uid,'parts'), ops = [];
+    for(const [id,json] of Object.entries(parts)) if(last[id]!==json) ops.push(F.setDoc(F.doc(col,id),{json, updatedAt:F.serverTimestamp()}));
+    for(const id of Object.keys(last)) if(!(id in parts)) ops.push(F.deleteDoc(F.doc(col,id)));
+    await Promise.all(ops);
+  };
+  A.onAuthStateChanged(auth, u=>{ answered = true; window.appOnAuth(u); });
+}catch(e){
+  console.error(e);
+  window.appFirebaseFailed('Impossible de charger Firebase. Vérifiez votre internet, ou continuez sans connexion.');
+}
+</script>
+</body>
+</html>
